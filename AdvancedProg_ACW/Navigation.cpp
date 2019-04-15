@@ -108,7 +108,7 @@ bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNa
 
 				cout << "Finished Loading Links." << endl << endl;
 
-				finPlaces.close();
+				finLinks.close();
 			}
 		}
 		catch (exception)
