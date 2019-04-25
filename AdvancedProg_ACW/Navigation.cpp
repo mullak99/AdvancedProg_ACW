@@ -31,6 +31,11 @@ bool Navigation::ProcessCommand(const string& commandString)
 
 bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNameLinks)
 {
+	Node n;
+	Node::node* node = new Node::node;//Struct for the node to hold the data from the csv file Places
+
+	node->next = nullptr;
+
 	fstream finPlaces(fileNamePlaces);
 	fstream finLinks(fileNameLinks);
 	if (finPlaces.fail() || finLinks.fail())
@@ -42,7 +47,7 @@ bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNa
 	{
 		try
 		{
-			vector<Node*> nodes;
+			//vector<Node*> nodes;
 
 			{
 				cout << "Loading Places..." << endl;
@@ -50,6 +55,8 @@ bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNa
 				string line;
 				while (getline(finPlaces, line))
 				{
+					//Node::node* temp = new Node::node;
+
 					string placeName;
 					int placesRef;
 					float placesLat, placesLong;
@@ -59,25 +66,45 @@ bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNa
 
 					getline(s, field, ',');
 					placeName = field;
+					//temp->Nodename = placeName;
 
 					getline(s, field, ',');
 					istringstream getRef(field);
 					getRef >> placesRef;
+					//temp->refnum = placesRef;
 
 					getline(s, field, ',');
 					istringstream getLat(field);
 					getLat >> placesLat;
+					//temp->lat = placesLat;
 
 					getline(s, field, ',');
 					istringstream getLong(field);
 					getLong >> placesLong;
+					//temp->longitude = placesLong;
+
+					n.insertAtEnd(node, placeName, placesRef, placesLat, placesLong);
 
 					cout << "Place: " << placeName << ", Ref: " << placesRef << ", Long: " << placesLong << ", Lat: " << placesLat << endl;
 				}
+				//temp->next = NULL;
 
 				cout << "Finished Loading Places." << endl << endl;
 
 				finPlaces.close();
+
+				cout << "Node stuff." << endl;
+
+				{
+					int i = 0;
+					for (; node; node = node->next)
+					{
+						cout << "Node[" << i << "] Nodename: " << node->Nodename << ", Ref: " << node->refnum << ", Long: " << node->longitude << ", Lat: " << node->lat << endl;
+						i++;
+					}
+				}
+
+				cout << "Finished Node stuff." << endl << endl;
 			}
 
 			{
