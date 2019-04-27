@@ -4,8 +4,20 @@
 #include <sstream>
 #include <vector>
 #include "Node.h"
+#include "Arc.h"
+#include <iterator>
+#include <string>
+#include <numeric>
 
 using namespace std;
+
+Node n;
+Node::node* node = new Node::node;
+
+Arc a;
+Arc::arc* arc = new Arc::arc;
+
+const bool debug = true;
 
 // Converts latitude/longitude into eastings/northings
 extern void LLtoUTM(const double Lat, const double Long, double &UTMNorthing, double &UTMEasting);
@@ -24,17 +36,86 @@ bool Navigation::ProcessCommand(const string& commandString)
 	string command;
 	inString >> command;
 
-	// Add your code here
+	if (commandString == "MaxDist")
+	{
+		return Navigation::MaxDist();
+	}
+	else if (commandString == "MaxLink")
+	{
+		return Navigation::MaxLink();
+	}
+	else if (commandString == "FindDist")
+	{
+		return Navigation::FindDist("");
+	}
+	else if (commandString == "FindNeighbour")
+	{
+		return Navigation::FindNeighbour("");
+	}
+	else if (commandString == "Check")
+	{
+		return Navigation::Check("");
+	}
+	else if (commandString == "FindRoute")
+	{
+		return Navigation::FindRoute("");
+	}
+	else if (commandString == "FindShortestRoute")
+	{
+		return Navigation::FindShortestRoute("");
+	}
+	else return false;
+}
 
+bool Navigation::MaxDist()
+{
+	return false;
+}
+
+bool Navigation::MaxLink()
+{
+	return false;
+}
+
+bool Navigation::FindDist(const std::string& params)
+{
+	cout << "FindDist" << endl;
+	cout << "Params passed: " << params << endl;
+	return false;
+}
+
+bool Navigation::FindNeighbour(const std::string& params)
+{
+	cout << "FindNeighbour" << endl;
+	cout << "Params passed: " << params << endl;
+	return false;
+}
+
+bool Navigation::Check(const std::string& params)
+{
+	cout << "Check" << endl;
+	cout << "Params passed: " << params << endl;
+	return false;
+}
+
+bool Navigation::FindRoute(const std::string& params)
+{
+	cout << "FindRoute" << endl;
+	cout << "Params passed: " << params << endl;
+	return false;
+}
+
+bool Navigation::FindShortestRoute(const std::string& params)
+{
+	cout << "FindShortestRoute" << endl;
+	cout << "Params passed: " << params << endl;
 	return false;
 }
 
 bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNameLinks)
 {
-	Node n;
-	Node::node* node = new Node::node;//Struct for the node to hold the data from the csv file Places
-
-	node->next = nullptr;
+	//node->next = nullptr;
+	//arc->next = nullptr;
 
 	fstream finPlaces(fileNamePlaces);
 	fstream finLinks(fileNameLinks);
@@ -50,13 +131,11 @@ bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNa
 			//vector<Node*> nodes;
 
 			{
-				cout << "Loading Places..." << endl;
+				if (debug) cout << "Loading Places..." << endl;
 
 				string line;
 				while (getline(finPlaces, line))
 				{
-					//Node::node* temp = new Node::node;
-
 					string placeName;
 					int placesRef;
 					float placesLat, placesLong;
@@ -66,35 +145,31 @@ bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNa
 
 					getline(s, field, ',');
 					placeName = field;
-					//temp->Nodename = placeName;
 
 					getline(s, field, ',');
 					istringstream getRef(field);
 					getRef >> placesRef;
-					//temp->refnum = placesRef;
 
 					getline(s, field, ',');
 					istringstream getLat(field);
 					getLat >> placesLat;
-					//temp->lat = placesLat;
 
 					getline(s, field, ',');
 					istringstream getLong(field);
 					getLong >> placesLong;
-					//temp->longitude = placesLong;
 
 					n.insertAtEnd(node, placeName, placesRef, placesLat, placesLong);
 
-					cout << "Place: " << placeName << ", Ref: " << placesRef << ", Long: " << placesLong << ", Lat: " << placesLat << endl;
+					if (debug) cout << "Place: " << placeName << ", Ref: " << placesRef << ", Long: " << placesLong << ", Lat: " << placesLat << endl;
 				}
-				//temp->next = NULL;
 
-				cout << "Finished Loading Places." << endl << endl;
+				if (debug) cout << "Finished Loading Places." << endl << endl;
 
 				finPlaces.close();
 
-				cout << "Node stuff." << endl;
+				if (debug) cout << "Node stuff." << endl;
 
+				if (debug)
 				{
 					int i = 0;
 					for (; node; node = node->next)
@@ -104,11 +179,11 @@ bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNa
 					}
 				}
 
-				cout << "Finished Node stuff." << endl << endl;
+				if (debug) cout << "Finished Node stuff." << endl << endl;
 			}
 
 			{
-				cout << "Loading Links..." << endl;
+				if (debug) cout << "Loading Links..." << endl;
 
 				string line;
 				while (getline(finLinks, line))
@@ -130,12 +205,28 @@ bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNa
 					getline(s, field, ',');
 					linkMode = field;
 
-					cout << "LinkMode: " << linkMode << ", Ref1: " << linkRef1 << ", Ref2: " << linkRef2 << endl;
+					a.insertAtEnd(arc, linkRef1, linkRef2, linkMode);
+
+					if (debug) cout << "LinkMode: " << linkMode << ", Ref1: " << linkRef1 << ", Ref2: " << linkRef2 << endl;
 				}
 
-				cout << "Finished Loading Links." << endl << endl;
+				if (debug) cout << "Finished Loading Links." << endl << endl;
 
 				finLinks.close();
+
+				if (debug) cout << "Arc stuff." << endl;
+
+				if (debug)
+				{
+					int i = 0;
+					for (; arc; arc = arc->next)
+					{
+						cout << "Arc[" << i << "] LinkMode: " << arc->transportmode << ", Ref1: " << arc->linkref1 << ", Ref2: " << arc->linkref2 << endl;
+						i++;
+					}
+				}
+
+				if (debug) cout << "Finished Arc stuff." << endl << endl;
 			}
 		}
 		catch (exception)
