@@ -1,4 +1,5 @@
 #include "Navigation.h"
+#include "ACW_Wrapper.h"
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -12,11 +13,14 @@
 using namespace std;
 
 Node n;
-Node::node* node = new Node::node;
+//Node::node* nodes = new Node::node;
+
+vector<Node::node> nodes;
 
 Arc a;
-Arc::arc* arc = new Arc::arc;
+//Arc::arc* arcs = new Arc::arc;
 
+const bool showloading = false;
 const bool debug = true;
 
 // Converts latitude/longitude into eastings/northings
@@ -69,6 +73,9 @@ bool Navigation::ProcessCommand(const string& commandString)
 
 bool Navigation::MaxDist()
 {
+	float largestDist = 0;
+	string node1, node2;
+
 	return false;
 }
 
@@ -131,7 +138,7 @@ bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNa
 			//vector<Node*> nodes;
 
 			{
-				if (debug) cout << "Loading Places..." << endl;
+				if (debug && showloading) cout << "Loading Places..." << endl;
 
 				string line;
 				while (getline(finPlaces, line))
@@ -158,32 +165,20 @@ bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNa
 					istringstream getLong(field);
 					getLong >> placesLong;
 
-					n.insertAtEnd(node, placeName, placesRef, placesLat, placesLong);
+					//n.insertAtEnd(nodes, placeName, placesRef, placesLat, placesLong);
 
-					if (debug) cout << "Place: " << placeName << ", Ref: " << placesRef << ", Long: " << placesLong << ", Lat: " << placesLat << endl;
+					nodes.push_back(Node::node(placeName, placesRef, placesLat, placesLong));
+
+					if (debug && showloading) cout << "Place: " << placeName << ", Ref: " << placesRef << ", Long: " << placesLong << ", Lat: " << placesLat << endl;
 				}
 
-				if (debug) cout << "Finished Loading Places." << endl << endl;
+				if (debug && showloading) cout << "Finished Loading Places." << endl << endl;
 
 				finPlaces.close();
-
-				if (debug) cout << "Node stuff." << endl;
-
-				if (debug)
-				{
-					int i = 0;
-					for (; node; node = node->next)
-					{
-						cout << "Node[" << i << "] Nodename: " << node->Nodename << ", Ref: " << node->refnum << ", Long: " << node->longitude << ", Lat: " << node->lat << endl;
-						i++;
-					}
-				}
-
-				if (debug) cout << "Finished Node stuff." << endl << endl;
 			}
-
+			
 			{
-				if (debug) cout << "Loading Links..." << endl;
+				if (debug && showloading) cout << "Loading Links..." << endl;
 
 				string line;
 				while (getline(finLinks, line))
@@ -205,28 +200,34 @@ bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNa
 					getline(s, field, ',');
 					linkMode = field;
 
-					a.insertAtEnd(arc, linkRef1, linkRef2, linkMode);
+					//a.insertAtEnd(arcs, linkRef1, linkRef2, linkMode);
 
-					if (debug) cout << "LinkMode: " << linkMode << ", Ref1: " << linkRef1 << ", Ref2: " << linkRef2 << endl;
+					for (auto& element : nodes) {
+						if (element.refnum == linkRef1)
+						{
+							element.m_arcs.push_back(Arc::arc(linkRef1, linkRef2, linkMode));
+						}
+					}
+
+					if (debug && showloading) cout << "LinkMode: " << linkMode << ", Ref1: " << linkRef1 << ", Ref2: " << linkRef2 << endl;
 				}
 
-				if (debug) cout << "Finished Loading Links." << endl << endl;
+				if (debug && showloading) cout << "Finished Loading Links." << endl << endl;
 
 				finLinks.close();
+			}
 
-				if (debug) cout << "Arc stuff." << endl;
-
-				if (debug)
-				{
-					int i = 0;
-					for (; arc; arc = arc->next)
-					{
-						cout << "Arc[" << i << "] LinkMode: " << arc->transportmode << ", Ref1: " << arc->linkref1 << ", Ref2: " << arc->linkref2 << endl;
-						i++;
+			if (debug)
+			{
+				int i = 0;
+				for (auto& element : nodes) {
+					cout << "Node[" << i << "] Nodename: " << element.Nodename << ", Ref: " << element.refnum << ", Long: " << element.longitude << ", Lat: " << element.lat << endl;
+					for (auto& arc : element.m_arcs) {
+						cout << "	LinkMode: " << arc.transportmode << ", Ref1: " << arc.linkref1 << ", Ref2: " << arc.linkref2 << endl;
 					}
+					cout << endl;
+					i++;
 				}
-
-				if (debug) cout << "Finished Arc stuff." << endl << endl;
 			}
 		}
 		catch (exception)

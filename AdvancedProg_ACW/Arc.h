@@ -1,23 +1,24 @@
 // Arc.h 
 #pragma once 
 #include <string>
+#include "Node.h"
+
 using namespace std;
 
-class Node;
+//class Node;
 
 class Arc
 {
 public:
 	struct arc
 	{
+		arc(int linkRef1, int linkRef2, string transportMode);
 		int linkref1;
 		int linkref2;
 		string transportmode;
-		struct arc* next = NULL;
+		//Node::node* m_destination;
 	};
-	void insertAtEnd(arc* head, int linkref1, int linkref2, string transportmode);
 
-private: Node* m_destination; //node pointer of destination variable 
-		 string mode;
-		 // Methods and other stuff 
+private:
+	// Methods and other stuff 
 };
