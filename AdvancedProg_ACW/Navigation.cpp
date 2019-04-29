@@ -21,7 +21,7 @@ Arc a;
 //Arc::arc* arcs = new Arc::arc;
 
 const bool showloading = false;
-const bool debug = true;
+const bool debug = false;
 
 // Converts latitude/longitude into eastings/northings
 extern void LLtoUTM(const double Lat, const double Long, double &UTMNorthing, double &UTMEasting);
@@ -71,11 +71,44 @@ bool Navigation::ProcessCommand(const string& commandString)
 	else return false;
 }
 
+double GetDistance(double x1, double y1, double x2, double y2)
+{
+	return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
+}
+
 bool Navigation::MaxDist()
 {
-	float largestDist = 0;
-	string node1, node2;
+	Node::node* largestNode1 = NULL;
+	Node::node* largestNode2 = NULL;
+	double largestDist = 0;
+	
+	for (auto& element1 : nodes)
+	{
+		for (auto& element2 : nodes)
+		{
+			if (element1.refnum != element2.refnum)
+			{
+				double lati1, longd1, lati2, longd2;
+				LLtoUTM(element1.lat, element1.longitude, lati1, longd1);
+				LLtoUTM(element2.lat, element2.longitude, lati2, longd2);
 
+				double dist = GetDistance(lati1, longd1, lati2, longd2);
+
+				if (dist > largestDist)
+				{
+					largestDist = dist;
+					largestNode1 = &element1;
+					largestNode2 = &element2;
+				}
+			}
+		}
+		largestDist = largestDist / 1000;
+	}
+	if (largestDist > 0 && largestNode1 != NULL && largestNode2 != NULL)
+	{
+		cout << setprecision(3) << "MaxDist" << endl << largestNode1->Nodename << "," << largestNode2->Nodename << "," << largestDist << endl << endl;
+		return true;
+	}
 	return false;
 }
 
