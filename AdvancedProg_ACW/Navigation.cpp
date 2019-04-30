@@ -268,9 +268,64 @@ const bool Navigation::FindNeighbour(const std::string& params) const
 const bool Navigation::Check(const std::string& params) const
 {
 	istringstream inString(params);
-	string command;
+	string command, mode;
+	std::vector<int> refs;
 	inString >> command;
+	inString >> mode;
 
+	for (int i = 0; inString >> i; )
+	{
+		refs.push_back(i);
+	}
+
+	vector<short> valid;
+	int refsSize = static_cast<int>(refs.size());
+	if (refsSize > 0)
+	{
+		cout << params << endl;
+
+		for (int i = 0; i < refsSize - 1; i++)
+		{
+			int refBegin = refs[i];
+			int refEnd = refs[i + 1];
+
+			for (auto& element : nodes)
+			{
+				if (element.refnum == refBegin)
+				{
+					for (auto& arcs : element.m_arcs)
+					{
+						if (arcs.linkref2 == refEnd && arcs.transportmode == mode)
+						{
+							valid.push_back(1);
+							break;
+						}
+					}
+					if (valid.empty() || static_cast<int>(valid.size()) < i + 1)
+					{
+						valid.push_back(0);
+						break;
+					}
+				}
+			}
+		}
+
+		for (int i = 0; i < refsSize - 1; i++)
+		{
+			if (valid[i] == 1)
+			{
+				cout << refs[i] << "," << refs[i + 1] << ",PASS" << endl;
+			}
+			else
+			{
+				cout << refs[i] << "," << refs[i + 1] << ",FAIL" << endl;
+				break;
+			}
+		}
+		cout << endl;
+
+		return true;
+	}
 	return false;
 }
 
@@ -297,31 +352,6 @@ const bool Navigation::FindShortestRoute(const std::string& params) const
 	inString >> linkRef1;
 	inString >> linkRef2;
 
-	/*
-	vector<int> adj[1024];
-
-	for (auto& element : nodes)
-	{
-		for (auto& arc : element.m_arcs)
-		{
-			add_edge(adj, arc.linkref1, arc.linkref2);
-		}
-	}
-
-	double distance;
-	vector<int> routePath = getShortestDistance(adj, linkRef1, linkRef2, v, distance);
-
-	if (distance > 0)
-	{
-		cout << "FindShortestPath " << mode << " " << linkRef1 << " " << linkRef2 << endl;
-
-		for (auto& route : routePath)
-		{
-			cout << route << endl;
-		}
-
-		return true;
-	}*/
 	return false;
 }
 
