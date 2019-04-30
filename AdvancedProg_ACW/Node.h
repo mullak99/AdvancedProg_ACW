@@ -9,10 +9,11 @@ using namespace std;
 class Node
 {
 public: //this is where the functions go 
-	Node();
+	Node() {}
 	struct node
 	{
-		node(const string &name, const int ref, const float latitude, const float longitude);
+		node(const string &name, const int ref, const float latitude, const float longitude) :
+			Nodename(name), refnum(ref), lat(latitude), longi(longitude) {}
 
 		string Nodename;
 		int refnum;
