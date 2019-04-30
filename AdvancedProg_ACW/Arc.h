@@ -5,7 +5,7 @@
 
 using namespace std;
 
-//class Node;
+class Node;
 
 class Arc
 {
@@ -16,7 +16,7 @@ public:
 		int linkref1;
 		int linkref2;
 		string transportmode;
-		//Node::node* m_destination;
+		
 	};
 
 private:

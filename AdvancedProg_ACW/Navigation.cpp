@@ -73,7 +73,7 @@ bool Navigation::ProcessCommand(const string& commandString)
 
 double GetDistance(double x1, double y1, double x2, double y2)
 {
-	return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
+	return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2)) / 1000;
 }
 
 bool Navigation::MaxDist()
@@ -88,11 +88,12 @@ bool Navigation::MaxDist()
 		{
 			if (element1.refnum != element2.refnum)
 			{
-				double lati1, longd1, lati2, longd2;
-				LLtoUTM(element1.lat, element1.longitude, lati1, longd1);
-				LLtoUTM(element2.lat, element2.longitude, lati2, longd2);
+				double lati1, longi1, lati2, longi2;
 
-				double dist = GetDistance(lati1, longd1, lati2, longd2);
+				LLtoUTM(element1.lat, element1.longitude, lati1, longi1);
+				LLtoUTM(element2.lat, element2.longitude, lati2, longi2);
+
+				double dist = GetDistance(lati1, longi1, lati2, longi2);
 
 				if (dist > largestDist)
 				{
@@ -102,7 +103,6 @@ bool Navigation::MaxDist()
 				}
 			}
 		}
-		largestDist = largestDist / 1000;
 	}
 	if (largestDist > 0 && largestNode1 != NULL && largestNode2 != NULL)
 	{
@@ -114,6 +114,44 @@ bool Navigation::MaxDist()
 
 bool Navigation::MaxLink()
 {
+	Node::node* linkStartNode = NULL;
+	Node::node* linkEndNode = NULL;
+	Arc::arc* largestArc = NULL;
+	double largestDist = 0;
+
+	for (auto& element : nodes)
+	{
+		linkStartNode = &element;
+
+		for (auto& arc : element.m_arcs)
+		{
+			for (auto& nodeatlink : nodes)
+			{
+				if (nodeatlink.refnum == arc.linkref2)
+					linkEndNode = &nodeatlink;
+			}
+			if (linkEndNode != NULL)
+			{
+				double lati1, longi1, lati2, longi2;
+
+				LLtoUTM(linkStartNode->lat, linkStartNode->longitude, lati1, longi1);
+				LLtoUTM(linkEndNode->lat, linkEndNode->longitude, lati2, longi2);
+
+				double dist = GetDistance(lati1, longi1, lati2, longi2);
+
+				if (dist > largestDist)
+				{
+					largestDist = dist;
+					largestArc = &arc;
+				}
+			}
+		}
+	}
+	if (largestDist > 0 && largestArc != NULL)
+	{
+		cout << setprecision(3) << "MaxLink" << endl << largestArc->linkref1 << "," << largestArc->linkref2 << "," << largestDist << endl << endl;
+		return true;
+	}
 	return false;
 }
 

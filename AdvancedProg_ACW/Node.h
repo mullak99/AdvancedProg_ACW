@@ -6,7 +6,7 @@
 
 using namespace std;
 
-//class Arc;
+class Arc;
 
 class Node
 {
