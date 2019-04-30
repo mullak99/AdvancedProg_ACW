@@ -12,13 +12,7 @@
 
 using namespace std;
 
-Node n;
-//Node::node* nodes = new Node::node;
-
 vector<Node::node> nodes;
-
-Arc a;
-//Arc::arc* arcs = new Arc::arc;
 
 const bool showloading = false;
 const bool debug = false;
@@ -93,7 +87,7 @@ bool Navigation::MaxDist()
 				LLtoUTM(element1.lat, element1.longitude, lati1, longi1);
 				LLtoUTM(element2.lat, element2.longitude, lati2, longi2);
 
-				double dist = GetDistance(lati1, longi1, lati2, longi2);
+				const double dist = GetDistance(lati1, longi1, lati2, longi2);
 
 				if (dist > largestDist)
 				{
@@ -137,7 +131,7 @@ bool Navigation::MaxLink()
 				LLtoUTM(linkStartNode->lat, linkStartNode->longitude, lati1, longi1);
 				LLtoUTM(linkEndNode->lat, linkEndNode->longitude, lati2, longi2);
 
-				double dist = GetDistance(lati1, longi1, lati2, longi2);
+				const double dist = GetDistance(lati1, longi1, lati2, longi2);
 
 				if (dist > largestDist)
 				{
@@ -192,9 +186,6 @@ bool Navigation::FindShortestRoute(const std::string& params)
 
 bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNameLinks)
 {
-	//node->next = nullptr;
-	//arc->next = nullptr;
-
 	fstream finPlaces(fileNamePlaces);
 	fstream finLinks(fileNameLinks);
 	if (finPlaces.fail() || finLinks.fail())
@@ -206,8 +197,6 @@ bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNa
 	{
 		try
 		{
-			//vector<Node*> nodes;
-
 			{
 				if (debug && showloading) cout << "Loading Places..." << endl;
 
@@ -235,8 +224,6 @@ bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNa
 					getline(s, field, ',');
 					istringstream getLong(field);
 					getLong >> placesLong;
-
-					//n.insertAtEnd(nodes, placeName, placesRef, placesLat, placesLong);
 
 					nodes.push_back(Node::node(placeName, placesRef, placesLat, placesLong));
 
@@ -271,13 +258,10 @@ bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNa
 					getline(s, field, ',');
 					linkMode = field;
 
-					//a.insertAtEnd(arcs, linkRef1, linkRef2, linkMode);
-
-					for (auto& element : nodes) {
+					for (auto& element : nodes)
+					{
 						if (element.refnum == linkRef1)
-						{
 							element.m_arcs.push_back(Arc::arc(linkRef1, linkRef2, linkMode));
-						}
 					}
 
 					if (debug && showloading) cout << "LinkMode: " << linkMode << ", Ref1: " << linkRef1 << ", Ref2: " << linkRef2 << endl;
@@ -291,9 +275,11 @@ bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNa
 			if (debug)
 			{
 				int i = 0;
-				for (auto& element : nodes) {
+				for (auto& element : nodes)
+				{
 					cout << "Node[" << i << "] Nodename: " << element.Nodename << ", Ref: " << element.refnum << ", Long: " << element.longitude << ", Lat: " << element.lat << endl;
-					for (auto& arc : element.m_arcs) {
+					for (auto& arc : element.m_arcs)
+					{
 						cout << "	LinkMode: " << arc.transportmode << ", Ref1: " << arc.linkref1 << ", Ref2: " << arc.linkref2 << endl;
 					}
 					cout << endl;
@@ -305,9 +291,7 @@ bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNa
 		{
 			return false;
 		}
-
 	}
-
 	return true;
 }
 
