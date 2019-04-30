@@ -6,19 +6,18 @@
 
 using namespace std;
 
-class Arc;
-
 class Node
 {
 public: //this is where the functions go 
+	Node();
 	struct node
 	{
-		node(string name, int ref, float latitude, float longitude);
+		node(const string &name, const int ref, const float latitude, const float longitude);
 
 		string Nodename;
 		int refnum;
 		float lat;
-		float longitude;
+		float longi;
 		vector<Arc::arc> m_arcs;
 	};
 private:

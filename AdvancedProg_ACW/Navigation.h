@@ -13,15 +13,15 @@ public:
 	Navigation();
 	~Navigation();
 
-	bool BuildNetwork(const std::string& fileNamePlaces, const std::string& fileNameLinks);
-	bool ProcessCommand(const std::string& commandString);
-	bool MaxDist();
-	bool MaxLink();
-	bool FindDist(const std::string& params);
-	bool FindNeighbour(const std::string& params);
-	bool Check(const std::string& params);
-	bool FindRoute(const std::string& params);
-	bool FindShortestRoute(const std::string& params);
+	const bool BuildNetwork(const std::string& fileNamePlaces, const std::string& fileNameLinks) const;
+	const bool ProcessCommand(const std::string& commandString) const;
+	const bool MaxDist() const;
+	const bool MaxLink() const;
+	const bool FindDist(const std::string& params) const;
+	const bool FindNeighbour(const std::string& params) const;
+	const bool Check(const std::string& params) const;
+	const bool FindRoute(const std::string& params) const;
+	const bool FindShortestRoute(const std::string& params) const;
 
 	// Add your code here
 };

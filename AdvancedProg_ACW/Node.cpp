@@ -1,12 +1,14 @@
 #include "Node.h"
-#include "Arc.h"
 
 // Methods, etc.
 
-Node::node::node(string name, int ref, float latitude, float longitude)
+Node::node::node(const string &name, const int ref, const float latitude, const float longitude)
 {
 	this->Nodename = name;
 	this->refnum = ref;
 	this->lat = latitude;
-	this->longitude = longitude;
+	this->longi = longitude;
 }
+
+Node::Node()
+{ }

@@ -5,18 +5,16 @@
 
 using namespace std;
 
-class Node;
-
 class Arc
 {
 public:
+	Arc();
 	struct arc
 	{
-		arc(int linkRef1, int linkRef2, string transportMode);
+		arc(const int linkRef1, const int linkRef2, const string &transportMode);
 		int linkref1;
 		int linkref2;
 		string transportmode;
-		
 	};
 
 private:

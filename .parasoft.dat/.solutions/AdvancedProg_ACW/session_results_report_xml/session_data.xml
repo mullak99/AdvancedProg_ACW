@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><ResultsSession>
+   <SessionData configName="500083 rule set" enabledAnalysis="Static" enabledHandlers="com.parasoft.xtest.checkers.api.standards.factory;com.parasoft.xtest.checkers.api.scope.factory;com.parasoft.xtest.checkers.api.metrics.factory" header="?? ?? ??false??false??" runId="" startTime="1556624866007" tool="c++test">
+      <Authors/>
+      <Selection>
+         <Res id="AdvancedProg_ACW/AdvancedProg_ACW/Navigation.cpp"/>
+      </Selection>
+      <XmlDataFiles/>
+   </SessionData>
+   <Locations/>
+   <CodingStandards>
+      <HistoryData authTsks="" authors="" cvdLn="293" startTime="1556624866007" totLn="293" totTsks="0"/>
+      <TestedFilesDetails>
+         <Total name="Suppressed / Total" supp="0" total="0">
+            <Project name="AdvancedProg_ACW" supp="0" total="0">
+               <Res name="Navigation.cpp" supp="0" total="0"/>
+            </Project>
+         </Total>
+      </TestedFilesDetails>
+   </CodingStandards>
+   <MetricsNormal/>
+   <MetricsDetailed/>
+</ResultsSession>

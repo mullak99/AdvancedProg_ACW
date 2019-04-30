@@ -28,7 +28,7 @@ Navigation::~Navigation()
 {
 }
 
-bool Navigation::ProcessCommand(const string& commandString)
+const bool Navigation::ProcessCommand(const string& commandString) const
 {
 	istringstream inString(commandString);
 	string command;
@@ -65,15 +65,15 @@ bool Navigation::ProcessCommand(const string& commandString)
 	else return false;
 }
 
-double GetDistance(double x1, double y1, double x2, double y2)
+double GetDistance(const double x1, const double y1, const double x2, const double y2)
 {
 	return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2)) / 1000;
 }
 
-bool Navigation::MaxDist()
+const bool Navigation::MaxDist() const
 {
-	Node::node* largestNode1 = NULL;
-	Node::node* largestNode2 = NULL;
+	Node::node* largestNode1 = nullptr;
+	Node::node* largestNode2 = nullptr;
 	double largestDist = 0;
 	
 	for (auto& element1 : nodes)
@@ -84,8 +84,8 @@ bool Navigation::MaxDist()
 			{
 				double lati1, longi1, lati2, longi2;
 
-				LLtoUTM(element1.lat, element1.longitude, lati1, longi1);
-				LLtoUTM(element2.lat, element2.longitude, lati2, longi2);
+				LLtoUTM(element1.lat, element1.longi, lati1, longi1);
+				LLtoUTM(element2.lat, element2.longi, lati2, longi2);
 
 				const double dist = GetDistance(lati1, longi1, lati2, longi2);
 
@@ -98,7 +98,7 @@ bool Navigation::MaxDist()
 			}
 		}
 	}
-	if (largestDist > 0 && largestNode1 != NULL && largestNode2 != NULL)
+	if (largestDist > 0 && largestNode1 != nullptr && largestNode2 != nullptr)
 	{
 		cout << setprecision(3) << "MaxDist" << endl << largestNode1->Nodename << "," << largestNode2->Nodename << "," << largestDist << endl << endl;
 		return true;
@@ -106,11 +106,11 @@ bool Navigation::MaxDist()
 	return false;
 }
 
-bool Navigation::MaxLink()
+const bool Navigation::MaxLink() const
 {
-	Node::node* linkStartNode = NULL;
-	Node::node* linkEndNode = NULL;
-	Arc::arc* largestArc = NULL;
+	Node::node* linkStartNode = nullptr;
+	Node::node* linkEndNode = nullptr;
+	Arc::arc* largestArc = nullptr;
 	double largestDist = 0;
 
 	for (auto& element : nodes)
@@ -124,12 +124,12 @@ bool Navigation::MaxLink()
 				if (nodeatlink.refnum == arc.linkref2)
 					linkEndNode = &nodeatlink;
 			}
-			if (linkEndNode != NULL)
+			if (linkEndNode != nullptr)
 			{
 				double lati1, longi1, lati2, longi2;
 
-				LLtoUTM(linkStartNode->lat, linkStartNode->longitude, lati1, longi1);
-				LLtoUTM(linkEndNode->lat, linkEndNode->longitude, lati2, longi2);
+				LLtoUTM(linkStartNode->lat, linkStartNode->longi, lati1, longi1);
+				LLtoUTM(linkEndNode->lat, linkEndNode->longi, lati2, longi2);
 
 				const double dist = GetDistance(lati1, longi1, lati2, longi2);
 
@@ -141,7 +141,7 @@ bool Navigation::MaxLink()
 			}
 		}
 	}
-	if (largestDist > 0 && largestArc != NULL)
+	if (largestDist > 0 && largestArc != nullptr)
 	{
 		cout << setprecision(3) << "MaxLink" << endl << largestArc->linkref1 << "," << largestArc->linkref2 << "," << largestDist << endl << endl;
 		return true;
@@ -149,42 +149,42 @@ bool Navigation::MaxLink()
 	return false;
 }
 
-bool Navigation::FindDist(const std::string& params)
+const bool Navigation::FindDist(const std::string& params) const
 {
 	cout << "FindDist" << endl;
 	cout << "Params passed: " << params << endl;
 	return false;
 }
 
-bool Navigation::FindNeighbour(const std::string& params)
+const bool Navigation::FindNeighbour(const std::string& params) const
 {
 	cout << "FindNeighbour" << endl;
 	cout << "Params passed: " << params << endl;
 	return false;
 }
 
-bool Navigation::Check(const std::string& params)
+const bool Navigation::Check(const std::string& params) const
 {
 	cout << "Check" << endl;
 	cout << "Params passed: " << params << endl;
 	return false;
 }
 
-bool Navigation::FindRoute(const std::string& params)
+const bool Navigation::FindRoute(const std::string& params) const
 {
 	cout << "FindRoute" << endl;
 	cout << "Params passed: " << params << endl;
 	return false;
 }
 
-bool Navigation::FindShortestRoute(const std::string& params)
+const bool Navigation::FindShortestRoute(const std::string& params) const
 {
 	cout << "FindShortestRoute" << endl;
 	cout << "Params passed: " << params << endl;
 	return false;
 }
 
-bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNameLinks)
+const bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNameLinks) const
 {
 	fstream finPlaces(fileNamePlaces);
 	fstream finLinks(fileNameLinks);
@@ -195,7 +195,6 @@ bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNa
 	}
 	else
 	{
-		try
 		{
 			{
 				if (debug && showloading) cout << "Loading Places..." << endl;
@@ -277,8 +276,8 @@ bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNa
 				int i = 0;
 				for (auto& element : nodes)
 				{
-					cout << "Node[" << i << "] Nodename: " << element.Nodename << ", Ref: " << element.refnum << ", Long: " << element.longitude << ", Lat: " << element.lat << endl;
-					for (auto& arc : element.m_arcs)
+					cout << "Node[" << i << "] Nodename: " << element.Nodename << ", Ref: " << element.refnum << ", Long: " << element.longi << ", Lat: " << element.lat << endl;
+					for (const auto& arc : element.m_arcs)
 					{
 						cout << "	LinkMode: " << arc.transportmode << ", Ref1: " << arc.linkref1 << ", Ref2: " << arc.linkref2 << endl;
 					}
@@ -286,10 +285,6 @@ bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNa
 					i++;
 				}
 			}
-		}
-		catch (exception)
-		{
-			return false;
 		}
 	}
 	return true;
