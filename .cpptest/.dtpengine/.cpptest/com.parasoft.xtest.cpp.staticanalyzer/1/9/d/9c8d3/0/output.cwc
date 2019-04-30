@@ -1,34 +1,4 @@
 <->
-<F>C:\Temp\advancedprog_acw\AdvancedProg_ACW\Node.cpp
-<c>INIT-14
-<b>Assignment in constructor 'node' found. Use constructor initialization list instead
-<l>8
-<k>2
-<s>false
-<N>
-<f>
-<L>0
-<->
-<F>C:\Temp\advancedprog_acw\AdvancedProg_ACW\Node.cpp
-<c>INIT-14
-<b>Assignment in constructor 'node' found. Use constructor initialization list instead
-<l>9
-<k>2
-<s>false
-<N>
-<f>
-<L>0
-<->
-<F>C:\Temp\advancedprog_acw\AdvancedProg_ACW\Node.cpp
-<c>INIT-14
-<b>Assignment in constructor 'node' found. Use constructor initialization list instead
-<l>10
-<k>2
-<s>false
-<N>
-<f>
-<L>0
-<->
 <F>c:\temp\advancedprog_acw\advancedprog_acw\Node.h
 <c>OPT-13
 <b>Members 'm_arcs' of structure 'node' are declared in suboptimal order for memory layout

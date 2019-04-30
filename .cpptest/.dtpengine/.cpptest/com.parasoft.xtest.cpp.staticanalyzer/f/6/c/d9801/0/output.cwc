@@ -9,26 +9,6 @@
 <f>
 <L>0
 <->
-<F>C:\Temp\advancedprog_acw\AdvancedProg_ACW\Arc.cpp
-<c>INIT-14
-<b>Assignment in constructor 'arc' found. Use constructor initialization list instead
-<l>6
-<k>2
-<s>false
-<N>
-<f>
-<L>0
-<->
-<F>C:\Temp\advancedprog_acw\AdvancedProg_ACW\Arc.cpp
-<c>INIT-14
-<b>Assignment in constructor 'arc' found. Use constructor initialization list instead
-<l>7
-<k>2
-<s>false
-<N>
-<f>
-<L>0
-<->
 <F>c:\temp\advancedprog_acw\advancedprog_acw\Arc.h
 <c>OPT-13
 <b>Members 'transportmode' of structure 'arc' are declared in suboptimal order for memory layout

@@ -1,4 +1,14 @@
 <->
+<F>C:\Temp\advancedprog_acw\AdvancedProg_ACW\Main.cpp
+<c>CODSTA-CPP-53
+<b>Declare local variable 'nav' as const
+<l>20
+<k>13
+<s>false
+<N>
+<f>
+<L>0
+<->
 <F>c:\temp\advancedprog_acw\advancedprog_acw\ACW_Wrapper.h
 <c>OPT-13
 <b>Members '_ellapsedTimes, _startTime' of class 'ACW_Wrapper' are declared in suboptimal order for memory layout

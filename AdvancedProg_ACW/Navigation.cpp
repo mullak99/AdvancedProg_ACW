@@ -267,6 +267,10 @@ const bool Navigation::FindNeighbour(const std::string& params) const
 
 const bool Navigation::Check(const std::string& params) const
 {
+	istringstream inString(params);
+	string command;
+	inString >> command;
+
 	return false;
 }
 
