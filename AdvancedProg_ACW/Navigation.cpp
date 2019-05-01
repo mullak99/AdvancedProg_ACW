@@ -238,27 +238,28 @@ const bool Navigation::FindNeighbour(const std::string& params) const
 {
 	istringstream inString(params);
 	string command;
-	int linkRef1;
+	int linkRef;
 	inString >> command;
-	inString >> linkRef1;
+	inString >> linkRef;
 
-	cout << "FindNeighbour " << linkRef1 << endl;
+	cout << "FindNeighbour " << linkRef << endl;
 
 	bool done = false;
 	for (auto& element : nodes)
 	{
-		if (!done)
+		for (auto& arc : element.m_arcs)
 		{
-			if (element.refnum == linkRef1)
+			if (arc.linkref1 == linkRef)
 			{
-				for (auto& arc : element.m_arcs)
-				{
-					done = true;
-					cout << arc.linkref2 << endl;
-				}
+				done = true;
+				cout << arc.linkref2 << endl;
+			}
+			else if (arc.linkref2 == linkRef)
+			{
+				done = true;
+				cout << arc.linkref1 << endl;
 			}
 		}
-		else break;
 	}
 	cout << endl;
 
