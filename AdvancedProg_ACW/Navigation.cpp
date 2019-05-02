@@ -15,7 +15,7 @@
 using namespace std;
 
 vector<Node::node> nodes;
-int v = 0;
+int v, e;
 
 const bool showloading = false;
 const bool debug = false;
@@ -30,73 +30,6 @@ Navigation::Navigation() : _outFile("Output.txt")
 Navigation::~Navigation()
 {
 }
-
-void add_edge(vector<int> adj[], int src, int dest)
-{
-	adj[src].push_back(dest);
-	adj[dest].push_back(src);
-}
-
-
-bool BFS(vector<int> adj[], int src, int dest, int v, int pred[], int dist[])
-{
-	list<int> queue;
-
-	bool* visited = new bool[v];
-
-
-	for (int i = 0; i < v; i++) {
-		visited[i] = false;
-		dist[i] = INT_MAX;
-		pred[i] = -1;
-	}
-	visited[src] = true;
-	dist[src] = 0;
-	queue.push_back(src);
-
-	while (!queue.empty()) {
-		int u = queue.front();
-		queue.pop_front();
-		for (int i = 0; i < adj[u].size(); i++) {
-			if (visited[adj[u][i]] == false) {
-				visited[adj[u][i]] = true;
-				dist[adj[u][i]] = dist[u] + 1;
-				pred[adj[u][i]] = u;
-				queue.push_back(adj[u][i]);
-
-				if (adj[u][i] == dest)
-					return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-vector<int> getShortestDistance(vector<int> adj[], int s, int dest, int v, double &distance)
-{
-	int* pred = new int[v];
-	int* dist = new int[v];
-	vector<int> path;
-
-	if (BFS(adj, s, dest, v, pred, dist) == false)
-	{
-		return path;
-	}
-	
-	int crawl = dest;
-	path.push_back(crawl);
-	while (pred[crawl] != -1)
-	{
-		path.push_back(pred[crawl]);
-		crawl = pred[crawl];
-	}
-
-	distance = dist[dest];
-
-	return path;
-}
-
 
 const bool Navigation::ProcessCommand(const string& commandString) const
 {
@@ -193,7 +126,9 @@ const bool Navigation::MaxLink() const
 			for (auto& nodeatlink : nodes)
 			{
 				if (nodeatlink.refnum == arc.linkref2)
+				{
 					linkEndNode = &nodeatlink;
+				}
 			}
 			if (linkEndNode != nullptr)
 			{
@@ -247,7 +182,7 @@ const bool Navigation::FindNeighbour(const std::string& params) const
 	bool done = false;
 	for (auto& element : nodes)
 	{
-		for (auto& arc : element.m_arcs)
+		for (const auto& arc : element.m_arcs)
 		{
 			if (arc.linkref1 == linkRef)
 			{
@@ -280,21 +215,21 @@ const bool Navigation::Check(const std::string& params) const
 	}
 
 	vector<short> valid;
-	int refsSize = static_cast<int>(refs.size());
+	const int refsSize = static_cast<int>(refs.size());
 	if (refsSize > 0)
 	{
 		cout << params << endl;
 
 		for (int i = 0; i < refsSize - 1; i++)
 		{
-			int refBegin = refs[i];
-			int refEnd = refs[i + 1];
+			const int refBegin = refs[i];
+			const int refEnd = refs[i + 1];
 
 			for (auto& element : nodes)
 			{
 				if (element.refnum == refBegin)
 				{
-					for (auto& arcs : element.m_arcs)
+					for (const auto& arcs : element.m_arcs)
 					{
 						if (arcs.linkref2 == refEnd && arcs.transportmode == mode)
 						{
@@ -352,8 +287,8 @@ const bool Navigation::FindShortestRoute(const std::string& params) const
 	inString >> mode;
 	inString >> linkRef1;
 	inString >> linkRef2;
-
-	return false;
+	
+	return true;
 }
 
 const bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNameLinks) const
@@ -396,8 +331,9 @@ const bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &
 					istringstream getLong(field);
 					getLong >> placesLong;
 
-					nodes.push_back(Node::node(placeName, placesRef, placesLat, placesLong));
 					v++;
+
+					nodes.push_back(Node::node(placeName, placesRef, placesLat, placesLong));
 
 					if (debug && showloading) cout << "Place: " << placeName << ", Ref: " << placesRef << ", Long: " << placesLong << ", Lat: " << placesLat << endl;
 				}
@@ -429,6 +365,7 @@ const bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &
 
 					getline(s, field, ',');
 					linkMode = field;
+					e++;
 
 					for (auto& element : nodes)
 					{
