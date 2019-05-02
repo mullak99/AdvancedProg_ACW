@@ -147,33 +147,40 @@ double GetDistance(const double x1, const double y1, const double x2, const doub
 
 const bool Navigation::MaxDist() const
 {
-	Node::node* linkStartNode = nullptr;
-	Node::node* linkEndNode = nullptr;
+	Node::node* largestNode1 = nullptr;
+	Node::node* largestNode2 = nullptr;
 	double largestDist = 0;
 
-	for (auto& node1 : nodes)
+	for (auto& element1 : nodes)
 	{
-		linkStartNode = &node1;
-
-		for (auto& node2 : nodes)
+		for (auto& element2 : nodes)
 		{
-			linkEndNode = &node2;
-			double lati1, longi1, lati2, longi2;
+			if (element1.refNum != element2.refNum)
+			{
+				double lati1, longi1, lati2, longi2;
 
-			LLtoUTM(linkStartNode->latitude, linkStartNode->longitude, lati1, longi1);
-			LLtoUTM(linkEndNode->latitude, linkEndNode->longitude, lati2, longi2);
+				LLtoUTM(element1.latitude, element1.longitude, lati1, longi1);
+				LLtoUTM(element2.latitude, element2.longitude, lati2, longi2);
 
-			const double dist = GetDistance(lati1, longi1, lati2, longi2);
-			if (dist > largestDist) largestDist = dist;
+				const double dist = GetDistance(lati1, longi1, lati2, longi2);
+
+				if (dist > largestDist)
+				{
+					largestDist = dist;
+					largestNode1 = &element1;
+					largestNode2 = &element2;
+				}
+			}
 		}
 	}
-	if (largestDist > 0)
+	if (largestDist > 0 && largestNode1 != nullptr && largestNode2 != nullptr)
 	{
-		outputFile << "MaxDist" << endl << linkStartNode->nodeName << "," << linkEndNode->nodeName << "," << setprecision(3) << largestDist << endl << endl;
+		outputFile << "MaxDist" << endl << largestNode1->nodeName << "," << largestNode2->nodeName << "," << setprecision(3) << largestDist << endl << endl;
 		return true;
 	}
 	return false;
 }
+
 
 const bool Navigation::MaxLink() const
 {
