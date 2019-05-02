@@ -7,12 +7,15 @@
 #include "Node.h"
 #include "Arc.h"
 #include <string>
-#include <array>
+#include <list>
 
 using namespace std;
 
 vector<Node::node> nodes;
 int v, e;
+
+vector<int> adj[1024];
+vector<string> adjMode[1024];
 
 ofstream outputFile;
 
@@ -30,9 +33,85 @@ Navigation::~Navigation()
 
 const void Navigation::InitFile()
 {
-	_outFile.open("Output.txt");
+	outputFile.open("Output.txt");
 
-	_outFile << fixed << setprecision(3);
+	outputFile << fixed << setprecision(3);
+}
+
+void add_edge(vector<int> adj[], vector<string> adjMode[], int src, int dest, string mode)
+{
+	adj[src].push_back(dest);
+	adj[dest].push_back(src);
+
+	adjMode[src].push_back(mode);
+	adjMode[dest].push_back(mode);
+}
+
+bool BFS(vector<int> adj[], vector<string> adjMode[], int src, int dest, string mode, int v, int pred[], int dist[])
+{
+	list<int> queue;
+
+	bool* visited = new bool[v];
+
+	for (int i = 0; i < v; i++) {
+		visited[i] = false;
+		dist[i] = INT_MAX;
+		pred[i] = -1;
+	}
+
+	visited[src] = true;
+	dist[src] = 0;
+	queue.push_back(src);
+
+	while (!queue.empty()) {
+		int u = queue.front();
+		queue.pop_front();
+		for (int i = 0; i < adj[u].size(); i++) {
+			if (visited[adj[u][i]] == false) {
+				visited[adj[u][i]] = true;
+				dist[adj[u][i]] = dist[u] + 1;
+				pred[adj[u][i]] = u;
+				queue.push_back(adj[u][i]);
+
+				if (mode == "")
+				{
+					if (adj[u][i] == dest)
+						return true;
+				}
+				else
+				{
+					if (adj[u][i] == dest && adjMode[u][i] == mode)
+						return true;
+				}
+			}
+		}
+	}
+
+	return false;
+}
+
+bool findShortestPath(vector<int> adj[], vector<string> adjMode[], int s, int dest, string mode, int v, list<int> &routePath, int &pathLen)
+{
+	int* pred = new int[v];
+	int* dist = new int[v];
+
+	if (BFS(adj, adjMode, s, dest, mode, v, pred, dist) == false)
+	{
+		return false;
+	}
+
+	vector<int> path;
+	int crawl = dest;
+	path.push_back(crawl);
+	while (pred[crawl] != -1) {
+		path.push_back(pred[crawl]);
+		crawl = pred[crawl];
+	}
+
+	pathLen = dist[dest];
+	for (int i = path.size() - 1; i >= 0; i--)
+		routePath.push_back(path[i]);
+
 }
 
 const bool Navigation::ProcessCommand(const string& commandString) const
@@ -168,8 +247,79 @@ const bool Navigation::FindDist(const std::string& params) const
 	inString >> linkRef1;
 	inString >> linkRef2;
 
+	string node1Name, node2Name;
 
-	
+	if (command != "" && linkRef1 != NULL && linkRef2 != NULL)
+	{
+		int i, j;
+		for (i = 0; i < v; i++)
+		{
+			if (nodes[i].refnum == linkRef1)
+			{
+				node1Name = nodes[i].Nodename;
+				break;
+			}
+		}
+		for (j = 0; j < v; j++)
+		{
+			if (nodes[j].refnum == linkRef2)
+			{
+				node2Name = nodes[j].Nodename;
+				break;
+			}
+		}
+
+		list<int> posPath;
+		int posLen;
+		vector<int> refs;
+
+		findShortestPath(adj, adjMode, i, j, "", v, posPath, posLen);
+
+		if (posLen > 0)
+		{
+			for (auto& path : posPath)
+			{
+				refs.push_back(nodes[path].refnum);
+			}
+
+			const int refsSize = static_cast<int>(refs.size());
+			if (refsSize > 0)
+			{
+				double totalDist = 0;
+				for (int i = 0; i < refsSize - 1; i++)
+				{
+					const int refBegin = refs[i];
+					const int refEnd = refs[i + 1];
+
+					Node::node* linkStartNode = nullptr;
+					Node::node* linkEndNode = nullptr;
+
+					for (auto& node : nodes)
+					{
+						if (node.refnum == refBegin) linkStartNode = &node;
+						else if (node.refnum == refEnd) linkEndNode = &node;
+					}
+
+					if (linkStartNode != nullptr && linkEndNode != nullptr)
+					{
+						double lati1, longi1, lati2, longi2;
+
+						LLtoUTM(linkStartNode->lat, linkStartNode->longi, lati1, longi1);
+						LLtoUTM(linkEndNode->lat, linkEndNode->longi, lati2, longi2);
+
+						totalDist += GetDistance(lati1, longi1, lati2, longi2);
+					}
+					else return false;
+				}
+				outputFile << params << endl;
+				outputFile << node1Name << "," << node2Name << "," << setprecision(3) << totalDist << endl << endl;
+
+				return true;
+			}
+			else return false;
+		}
+		else return false;
+	}
 	return false;
 }
 
@@ -209,7 +359,7 @@ const bool Navigation::Check(const std::string& params) const
 {
 	istringstream inString(params);
 	string command, mode;
-	std::vector<int> refs;
+	vector<int> refs;
 	inString >> command;
 	inString >> mode;
 
@@ -229,19 +379,32 @@ const bool Navigation::Check(const std::string& params) const
 			const int refBegin = refs[i];
 			const int refEnd = refs[i + 1];
 
+			bool refBeginRan = false;
+			bool refEndRan = false;
 			for (auto& element : nodes)
 			{
-				if (element.refnum == refBegin)
+				if (element.refnum == refBegin || element.refnum == refEnd)
 				{
+					if (element.refnum == refBegin) refBeginRan = true;
+					else if (element.refnum == refEnd) refEndRan = true;
 					for (const auto& arcs : element.m_arcs)
 					{
-						if (arcs.linkref2 == refEnd && arcs.transportmode == mode)
+						if (arcs.linkref1 == refBegin && arcs.linkref2 == refEnd && arcs.transportmode == mode)
 						{
+							refBeginRan = false;
+							refEndRan = false;
+							valid.push_back(1);
+							break;
+						}
+						else if (arcs.linkref1 == refEnd && arcs.linkref2 == refBegin && arcs.transportmode == mode)
+						{
+							refBeginRan = false;
+							refEndRan = false;
 							valid.push_back(1);
 							break;
 						}
 					}
-					if (valid.empty() || static_cast<int>(valid.size()) < i + 1)
+					if ((valid.empty() || static_cast<int>(valid.size()) < i + 1) && refBeginRan && refEndRan)
 					{
 						valid.push_back(0);
 						break;
@@ -270,15 +433,7 @@ const bool Navigation::Check(const std::string& params) const
 
 const bool Navigation::FindRoute(const std::string& params) const
 {
-	istringstream inString(params);
-	string command, mode;
-	int linkRef1, linkRef2;
-	inString >> command;
-	inString >> mode;
-	inString >> linkRef1;
-	inString >> linkRef2;
-
-	return false;
+	return FindShortestRoute(params);
 }
 
 const bool Navigation::FindShortestRoute(const std::string& params) const
@@ -291,6 +446,37 @@ const bool Navigation::FindShortestRoute(const std::string& params) const
 	inString >> linkRef1;
 	inString >> linkRef2;
 	
+	if (command != "" && mode != "" && linkRef1 != NULL && linkRef2 != NULL)
+	{
+		int i, j;
+		for (i = 0; i < v; i++)
+		{
+			if (nodes[i].refnum == linkRef1) break;
+		}
+		for (j = 0; j < v; j++)
+		{
+			if (nodes[j].refnum == linkRef2) break;
+		}
+
+		list<int> posPath;
+		int posLen;
+
+		findShortestPath(adj, adjMode, i, j, mode, v, posPath, posLen);
+
+		outputFile << params << endl;
+
+		if (posLen > 0)
+		{
+			for (auto& path : posPath)
+			{
+				outputFile << nodes[path].refnum << endl;
+			}
+		}
+		else outputFile << "FAIL" << endl;
+			
+		outputFile << endl;
+		return true;
+	}
 	return false;
 }
 
@@ -365,9 +551,25 @@ const bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &
 					for (auto& element : nodes)
 					{
 						if (element.refnum == linkRef1)
+						{
 							element.m_arcs.push_back(Arc::arc(linkRef1, linkRef2, linkMode));
+						}
 					}
+
+					int i, j;
+					for (i = 0; i < v; i++)
+					{
+						if (nodes[i].refnum == linkRef1) break;
+					}
+					for (j = 0; j < v; j++)
+					{
+						if (nodes[j].refnum == linkRef2) break;
+					}
+					//cout << "Linked '" << linkRef1 << "[" << i << "]' with '" << linkRef2 << "[" << j << "]'." << endl;
+					add_edge(adj, adjMode, i, j, linkMode);
 				}
+
+				
 
 				finLinks.close();
 			}
