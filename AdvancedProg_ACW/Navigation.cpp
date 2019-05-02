@@ -1,18 +1,17 @@
 #include "Navigation.h"
 #include "ACW_Wrapper.h"
+#include "Node.h"
+#include "Arc.h"
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 #include <vector>
-#include "Node.h"
-#include "Arc.h"
 #include <string>
 #include <list>
 
 using namespace std;
 
 vector<Node::node> nodes;
-int v, e;
 
 vector<int> adj[1024];
 vector<string> adjMode[1024];
@@ -118,8 +117,10 @@ bool findShortestPath(vector<int> adj[], vector<string> adjMode[], int s, int de
 	}
 
 	pathLen = dist[dest];
-	for (int i = path.size() - 1; i >= 0; i--)
+	for (long i = static_cast<long>(path.size()) - 1; i >= 0; i--)
 		routePath.push_back(path[i]);
+
+	return true;
 
 }
 
@@ -261,7 +262,7 @@ const bool Navigation::FindDist(const std::string& params) const
 	if (command != "" && linkRef1 != NULL && linkRef2 != NULL)
 	{
 		int i, j;
-		for (i = 0; i < v; i++)
+		for (i = 0; i < static_cast<int>(nodes.size()); i++)
 		{
 			if (nodes[i].refnum == linkRef1)
 			{
@@ -269,7 +270,7 @@ const bool Navigation::FindDist(const std::string& params) const
 				break;
 			}
 		}
-		for (j = 0; j < v; j++)
+		for (j = 0; j < static_cast<int>(nodes.size()); j++)
 		{
 			if (nodes[j].refnum == linkRef2)
 			{
@@ -282,7 +283,7 @@ const bool Navigation::FindDist(const std::string& params) const
 		int posLen;
 		vector<int> refs;
 
-		findShortestPath(adj, adjMode, i, j, "", v, posPath, posLen);
+		findShortestPath(adj, adjMode, i, j, "", static_cast<int>(nodes.size()), posPath, posLen);
 
 		if (posLen > 0)
 		{
@@ -297,8 +298,9 @@ const bool Navigation::FindDist(const std::string& params) const
 				double totalDist = 0;
 				for (int i = 0; i < refsSize - 1; i++)
 				{
+					const int j = i + 1;
 					const int refBegin = refs[i];
-					const int refEnd = refs[i + 1];
+					const int refEnd = refs[j];
 
 					Node::node* linkStartNode = nullptr;
 					Node::node* linkEndNode = nullptr;
@@ -385,8 +387,9 @@ const bool Navigation::Check(const std::string& params) const
 
 		for (int i = 0; i < refsSize - 1; i++)
 		{
+			const int j = i + 1;
 			const int refBegin = refs[i];
-			const int refEnd = refs[i + 1];
+			const int refEnd = refs[j];
 
 			bool refBeginRan = false;
 			bool refEndRan = false;
@@ -424,13 +427,14 @@ const bool Navigation::Check(const std::string& params) const
 
 		for (int i = 0; i < refsSize - 1; i++)
 		{
+			const int j = i + 1;
 			if (valid[i] == 1)
 			{
-				outputFile << refs[i] << "," << refs[i + 1] << ",PASS" << endl;
+				outputFile << refs[i] << "," << refs[j] << ",PASS" << endl;
 			}
 			else
 			{
-				outputFile << refs[i] << "," << refs[i + 1] << ",FAIL" << endl;
+				outputFile << refs[i] << "," << refs[j] << ",FAIL" << endl;
 				break;
 			}
 		}
@@ -458,11 +462,11 @@ const bool Navigation::FindShortestRoute(const std::string& params) const
 	if (command != "" && mode != "" && linkRef1 != NULL && linkRef2 != NULL)
 	{
 		int i, j;
-		for (i = 0; i < v; i++)
+		for (i = 0; i < static_cast<int>(nodes.size()); i++)
 		{
 			if (nodes[i].refnum == linkRef1) break;
 		}
-		for (j = 0; j < v; j++)
+		for (j = 0; j < static_cast<int>(nodes.size()); j++)
 		{
 			if (nodes[j].refnum == linkRef2) break;
 		}
@@ -470,7 +474,7 @@ const bool Navigation::FindShortestRoute(const std::string& params) const
 		list<int> posPath;
 		int posLen;
 
-		findShortestPath(adj, adjMode, i, j, mode, v, posPath, posLen);
+		findShortestPath(adj, adjMode, i, j, mode, static_cast<int>(nodes.size()), posPath, posLen);
 
 		outputFile << params << endl;
 
@@ -527,11 +531,8 @@ const bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &
 					istringstream getLong(field);
 					getLong >> placesLong;
 
-					v++;
-
 					nodes.push_back(Node::node(placeName, placesRef, placesLat, placesLong));
 				}
-
 				finPlaces.close();
 			}
 			
@@ -555,7 +556,6 @@ const bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &
 
 					getline(s, field, ',');
 					linkMode = field;
-					e++;
 
 					for (auto& element : nodes)
 					{
@@ -566,15 +566,14 @@ const bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &
 					}
 
 					int i, j;
-					for (i = 0; i < v; i++)
+					for (i = 0; i < static_cast<int>(nodes.size()); i++)
 					{
 						if (nodes[i].refnum == linkRef1) break;
 					}
-					for (j = 0; j < v; j++)
+					for (j = 0; j < static_cast<int>(nodes.size()); j++)
 					{
 						if (nodes[j].refnum == linkRef2) break;
 					}
-					//cout << "Linked '" << linkRef1 << "[" << i << "]' with '" << linkRef2 << "[" << j << "]'." << endl;
 					add_edge(adj, adjMode, i, j, linkMode);
 				}
 
@@ -586,5 +585,3 @@ const bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &
 	}
 	return true;
 }
-
-// Add your code here
