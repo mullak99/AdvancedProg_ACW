@@ -12,13 +12,12 @@ public:
 	struct arc
 	{
 		arc(const int linkRef1, const int linkRef2, const string &transportMode) :
-			linkref1(linkRef1), linkref2(linkRef2), transportmode(transportMode) { }
+			linkRef1(linkRef1), linkRef2(linkRef2), transportMode(transportMode) { }
 
-		int linkref1;
-		int linkref2;
-		string transportmode;
+		int linkRef1, linkRef2;
+		string transportMode;
 	};
 
 private:
-	// Methods and other stuff 
+	
 };

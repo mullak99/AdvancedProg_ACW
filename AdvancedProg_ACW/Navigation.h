@@ -1,13 +1,10 @@
 #pragma once
-
 #include <fstream>
 #include <string>
 
 class Navigation
 {
 	std::ofstream _outFile;
-
-	// Add your code here
 
 public:
 	Navigation();
@@ -24,7 +21,4 @@ public:
 	const bool Check(const std::string& params) const;
 	const bool FindRoute(const std::string& params) const;
 	const bool FindShortestRoute(const std::string& params) const;
-
-
-	// Add your code here
 };

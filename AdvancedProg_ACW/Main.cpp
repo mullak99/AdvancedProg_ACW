@@ -17,7 +17,7 @@ static void executeACW() {
 
 	// Build Navigation
 	wrapper.startTimer();
-	Navigation nav;
+	const Navigation nav;
 	if (nav.BuildNetwork("Places.csv", "Links.csv")) {
 		const auto elapsed = wrapper.stopTimer();
 		std::cout << std::fixed << std::setprecision(1) << "BuildNetwork - " << elapsed << " microseconds" << std::endl;

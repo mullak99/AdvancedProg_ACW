@@ -46,7 +46,7 @@ const void Navigation::InitFile()
 	Variations in the code was needed to add support for Transport Mode checking.
 */
 
-void add_edge(vector<int> adj[], vector<string> adjMode[], int src, int dest, string mode)
+const void add_edge(vector<int> adj[], vector<string> adjMode[], int src, int dest, string mode)
 {
 	adj[src].push_back(dest);
 	adj[dest].push_back(src);
@@ -55,13 +55,13 @@ void add_edge(vector<int> adj[], vector<string> adjMode[], int src, int dest, st
 	adjMode[dest].push_back(mode);
 }
 
-bool BFS(vector<int> adj[], vector<string> adjMode[], int src, int dest, string mode, int v, int pred[], int dist[])
+const bool BFS(vector<int> adj[], vector<string> adjMode[], int src, int dest, string mode, int v, int pred[], int dist[])
 {
 	list<int> queue;
-
 	bool* visited = new bool[v];
 
-	for (int i = 0; i < v; i++) {
+	for (int i = 0; i < v; i++)
+	{
 		visited[i] = false;
 		dist[i] = INT_MAX;
 		pred[i] = -1;
@@ -71,11 +71,14 @@ bool BFS(vector<int> adj[], vector<string> adjMode[], int src, int dest, string 
 	dist[src] = 0;
 	queue.push_back(src);
 
-	while (!queue.empty()) {
+	while (!queue.empty())
+	{
 		int u = queue.front();
 		queue.pop_front();
-		for (int i = 0; i < adj[u].size(); i++) {
-			if (visited[adj[u][i]] == false) {
+		for (int i = 0; i < adj[u].size(); i++)
+		{
+			if (!visited[adj[u][i]])
+			{
 				visited[adj[u][i]] = true;
 				dist[adj[u][i]] = dist[u] + 1;
 				pred[adj[u][i]] = u;
@@ -86,15 +89,11 @@ bool BFS(vector<int> adj[], vector<string> adjMode[], int src, int dest, string 
 					if (adj[u][i] == dest)
 						return true;
 				}
-				else
-				{
-					if (adj[u][i] == dest && adjMode[u][i] == mode)
-						return true;
-				}
+				else if (adj[u][i] == dest && adjMode[u][i] == mode)
+					return true;
 			}
 		}
 	}
-
 	return false;
 }
 
@@ -103,15 +102,13 @@ bool findShortestPath(vector<int> adj[], vector<string> adjMode[], int s, int de
 	int* pred = new int[v];
 	int* dist = new int[v];
 
-	if (BFS(adj, adjMode, s, dest, mode, v, pred, dist) == false)
-	{
-		return false;
-	}
+	if (!BFS(adj, adjMode, s, dest, mode, v, pred, dist)) return false;
 
 	vector<int> path;
 	int crawl = dest;
 	path.push_back(crawl);
-	while (pred[crawl] != -1) {
+	while (pred[crawl] != -1)
+	{
 		path.push_back(pred[crawl]);
 		crawl = pred[crawl];
 	}
@@ -121,7 +118,6 @@ bool findShortestPath(vector<int> adj[], vector<string> adjMode[], int s, int de
 		routePath.push_back(path[i]);
 
 	return true;
-
 }
 
 const bool Navigation::ProcessCommand(const string& commandString) const
@@ -130,35 +126,20 @@ const bool Navigation::ProcessCommand(const string& commandString) const
 	string command;
 	inString >> command;
 
-
 	if (command == "MaxDist")
-	{
 		return Navigation::MaxDist();
-	}
 	else if (command == "MaxLink")
-	{
 		return Navigation::MaxLink();
-	}
 	else if (command == "FindDist")
-	{
 		return Navigation::FindDist(commandString);
-	}
 	else if (command == "FindNeighbour")
-	{
 		return Navigation::FindNeighbour(commandString);
-	}
 	else if (command == "Check")
-	{
 		return Navigation::Check(commandString);
-	}
 	else if (command == "FindRoute")
-	{
 		return Navigation::FindRoute(commandString);
-	}
 	else if (command == "FindShortestRoute")
-	{
 		return Navigation::FindShortestRoute(commandString);
-	}
 	else return false;
 }
 
@@ -169,35 +150,29 @@ double GetDistance(const double x1, const double y1, const double x2, const doub
 
 const bool Navigation::MaxDist() const
 {
-	Node::node* largestNode1 = nullptr;
-	Node::node* largestNode2 = nullptr;
+	Node::node* linkStartNode = nullptr;
+	Node::node* linkEndNode = nullptr;
 	double largestDist = 0;
-	
-	for (auto& element1 : nodes)
+
+	for (auto& node1 : nodes)
 	{
-		for (auto& element2 : nodes)
+		linkStartNode = &node1;
+
+		for (auto& node2 : nodes)
 		{
-			if (element1.refnum != element2.refnum)
-			{
-				double lati1, longi1, lati2, longi2;
+			linkEndNode = &node2;
+			double lati1, longi1, lati2, longi2;
 
-				LLtoUTM(element1.lat, element1.longi, lati1, longi1);
-				LLtoUTM(element2.lat, element2.longi, lati2, longi2);
+			LLtoUTM(linkStartNode->latitude, linkStartNode->longitude, lati1, longi1);
+			LLtoUTM(linkEndNode->latitude, linkEndNode->longitude, lati2, longi2);
 
-				const double dist = GetDistance(lati1, longi1, lati2, longi2);
-
-				if (dist > largestDist)
-				{
-					largestDist = dist;
-					largestNode1 = &element1;
-					largestNode2 = &element2;
-				}
-			}
+			const double dist = GetDistance(lati1, longi1, lati2, longi2);
+			if (dist > largestDist) largestDist = dist;
 		}
 	}
-	if (largestDist > 0 && largestNode1 != nullptr && largestNode2 != nullptr)
+	if (largestDist > 0)
 	{
-		outputFile << "MaxDist" << endl << largestNode1->Nodename << "," << largestNode2->Nodename << "," << setprecision(3) << largestDist << endl << endl;
+		outputFile << "MaxDist" << endl << linkStartNode->nodeName << "," << linkEndNode->nodeName << "," << setprecision(3) << largestDist << endl << endl;
 		return true;
 	}
 	return false;
@@ -214,21 +189,19 @@ const bool Navigation::MaxLink() const
 	{
 		linkStartNode = &element;
 
-		for (auto& arc : element.m_arcs)
+		for (auto& arc : element.nodeArcs)
 		{
 			for (auto& nodeatlink : nodes)
 			{
-				if (nodeatlink.refnum == arc.linkref2)
-				{
+				if (nodeatlink.refNum == arc.linkRef2)
 					linkEndNode = &nodeatlink;
-				}
 			}
 			if (linkEndNode != nullptr)
 			{
 				double lati1, longi1, lati2, longi2;
 
-				LLtoUTM(linkStartNode->lat, linkStartNode->longi, lati1, longi1);
-				LLtoUTM(linkEndNode->lat, linkEndNode->longi, lati2, longi2);
+				LLtoUTM(linkStartNode->latitude, linkStartNode->longitude, lati1, longi1);
+				LLtoUTM(linkEndNode->latitude, linkEndNode->longitude, lati2, longi2);
 
 				const double dist = GetDistance(lati1, longi1, lati2, longi2);
 
@@ -242,7 +215,7 @@ const bool Navigation::MaxLink() const
 	}
 	if (largestDist > 0 && largestArc != nullptr)
 	{
-		outputFile << "MaxLink" << endl << largestArc->linkref1 << "," << largestArc->linkref2 << "," << setprecision(3) << largestDist << endl << endl;
+		outputFile << "MaxLink" << endl << largestArc->linkRef1 << "," << largestArc->linkRef2 << "," << setprecision(3) << largestDist << endl << endl;
 		return true;
 	}
 	return false;
@@ -264,17 +237,17 @@ const bool Navigation::FindDist(const std::string& params) const
 		int i, j;
 		for (i = 0; i < static_cast<int>(nodes.size()); i++)
 		{
-			if (nodes[i].refnum == linkRef1)
+			if (nodes[i].refNum == linkRef1)
 			{
-				node1Name = nodes[i].Nodename;
+				node1Name = nodes[i].nodeName;
 				break;
 			}
 		}
 		for (j = 0; j < static_cast<int>(nodes.size()); j++)
 		{
-			if (nodes[j].refnum == linkRef2)
+			if (nodes[j].refNum == linkRef2)
 			{
-				node2Name = nodes[j].Nodename;
+				node2Name = nodes[j].nodeName;
 				break;
 			}
 		}
@@ -288,9 +261,7 @@ const bool Navigation::FindDist(const std::string& params) const
 		if (posLen > 0)
 		{
 			for (auto& path : posPath)
-			{
-				refs.push_back(nodes[path].refnum);
-			}
+				refs.push_back(nodes[path].refNum);
 
 			const int refsSize = static_cast<int>(refs.size());
 			if (refsSize > 0)
@@ -307,16 +278,16 @@ const bool Navigation::FindDist(const std::string& params) const
 
 					for (auto& node : nodes)
 					{
-						if (node.refnum == refBegin) linkStartNode = &node;
-						else if (node.refnum == refEnd) linkEndNode = &node;
+						if (node.refNum == refBegin) linkStartNode = &node;
+						else if (node.refNum == refEnd) linkEndNode = &node;
 					}
 
 					if (linkStartNode != nullptr && linkEndNode != nullptr)
 					{
 						double lati1, longi1, lati2, longi2;
 
-						LLtoUTM(linkStartNode->lat, linkStartNode->longi, lati1, longi1);
-						LLtoUTM(linkEndNode->lat, linkEndNode->longi, lati2, longi2);
+						LLtoUTM(linkStartNode->latitude, linkStartNode->longitude, lati1, longi1);
+						LLtoUTM(linkEndNode->latitude, linkEndNode->longitude, lati2, longi2);
 
 						totalDist += GetDistance(lati1, longi1, lati2, longi2);
 					}
@@ -342,22 +313,22 @@ const bool Navigation::FindNeighbour(const std::string& params) const
 	inString >> command;
 	inString >> linkRef;
 
-	outputFile << "FindNeighbour " << linkRef << endl;
+	outputFile << params << endl;
 
 	bool done = false;
 	for (auto& element : nodes)
 	{
-		for (const auto& arc : element.m_arcs)
+		for (const auto& arc : element.nodeArcs)
 		{
-			if (arc.linkref1 == linkRef)
+			if (arc.linkRef1 == linkRef)
 			{
 				done = true;
-				outputFile << arc.linkref2 << endl;
+				outputFile << arc.linkRef2 << endl;
 			}
-			else if (arc.linkref2 == linkRef)
+			else if (arc.linkRef2 == linkRef)
 			{
 				done = true;
-				outputFile << arc.linkref1 << endl;
+				outputFile << arc.linkRef1 << endl;
 			}
 		}
 	}
@@ -375,9 +346,7 @@ const bool Navigation::Check(const std::string& params) const
 	inString >> mode;
 
 	for (int i = 0; inString >> i; )
-	{
 		refs.push_back(i);
-	}
 
 	vector<short> valid;
 	const int refsSize = static_cast<int>(refs.size());
@@ -395,20 +364,20 @@ const bool Navigation::Check(const std::string& params) const
 			bool refEndRan = false;
 			for (auto& element : nodes)
 			{
-				if (element.refnum == refBegin || element.refnum == refEnd)
+				if (element.refNum == refBegin || element.refNum == refEnd)
 				{
-					if (element.refnum == refBegin) refBeginRan = true;
-					else if (element.refnum == refEnd) refEndRan = true;
-					for (const auto& arcs : element.m_arcs)
+					if (element.refNum == refBegin) refBeginRan = true;
+					else if (element.refNum == refEnd) refEndRan = true;
+					for (const auto& arcs : element.nodeArcs)
 					{
-						if (arcs.linkref1 == refBegin && arcs.linkref2 == refEnd && arcs.transportmode == mode)
+						if (arcs.linkRef1 == refBegin && arcs.linkRef2 == refEnd && arcs.transportMode == mode)
 						{
 							refBeginRan = false;
 							refEndRan = false;
 							valid.push_back(1);
 							break;
 						}
-						else if (arcs.linkref1 == refEnd && arcs.linkref2 == refBegin && arcs.transportmode == mode)
+						else if (arcs.linkRef1 == refEnd && arcs.linkRef2 == refBegin && arcs.transportMode == mode)
 						{
 							refBeginRan = false;
 							refEndRan = false;
@@ -429,9 +398,7 @@ const bool Navigation::Check(const std::string& params) const
 		{
 			const int j = i + 1;
 			if (valid[i] == 1)
-			{
 				outputFile << refs[i] << "," << refs[j] << ",PASS" << endl;
-			}
 			else
 			{
 				outputFile << refs[i] << "," << refs[j] << ",FAIL" << endl;
@@ -463,13 +430,9 @@ const bool Navigation::FindShortestRoute(const std::string& params) const
 	{
 		int i, j;
 		for (i = 0; i < static_cast<int>(nodes.size()); i++)
-		{
-			if (nodes[i].refnum == linkRef1) break;
-		}
+			if (nodes[i].refNum == linkRef1) break;
 		for (j = 0; j < static_cast<int>(nodes.size()); j++)
-		{
-			if (nodes[j].refnum == linkRef2) break;
-		}
+			if (nodes[j].refNum == linkRef2) break;
 
 		list<int> posPath;
 		int posLen;
@@ -481,9 +444,7 @@ const bool Navigation::FindShortestRoute(const std::string& params) const
 		if (posLen > 0)
 		{
 			for (auto& path : posPath)
-			{
-				outputFile << nodes[path].refnum << endl;
-			}
+				outputFile << nodes[path].refNum << endl;
 		}
 		else outputFile << "FAIL" << endl;
 			
@@ -558,27 +519,17 @@ const bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &
 					linkMode = field;
 
 					for (auto& element : nodes)
-					{
-						if (element.refnum == linkRef1)
-						{
-							element.m_arcs.push_back(Arc::arc(linkRef1, linkRef2, linkMode));
-						}
-					}
+						if (element.refNum == linkRef1) element.nodeArcs.push_back(Arc::arc(linkRef1, linkRef2, linkMode));
 
 					int i, j;
 					for (i = 0; i < static_cast<int>(nodes.size()); i++)
-					{
-						if (nodes[i].refnum == linkRef1) break;
-					}
+						if (nodes[i].refNum == linkRef1) break;
+
 					for (j = 0; j < static_cast<int>(nodes.size()); j++)
-					{
-						if (nodes[j].refnum == linkRef2) break;
-					}
+						if (nodes[j].refNum == linkRef2) break;
+
 					add_edge(adj, adjMode, i, j, linkMode);
 				}
-
-				
-
 				finLinks.close();
 			}
 		}

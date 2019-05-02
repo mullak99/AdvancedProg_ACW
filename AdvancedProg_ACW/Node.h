@@ -8,18 +8,18 @@ using namespace std;
 
 class Node
 {
-public: //this is where the functions go 
+public:
 	Node() {}
 	struct node
 	{
 		node(const string &name, const int ref, const double latitude, const double longitude) :
-			Nodename(name), refnum(ref), lat(latitude), longi(longitude) {}
+			nodeName(name), refNum(ref), latitude(latitude), longitude(longitude) {}
 
-		string Nodename;
-		int refnum;
-		double lat;
-		double longi;
-		vector<Arc::arc> m_arcs;
+		string nodeName;
+		int refNum;
+		double latitude;
+		double longitude;
+		vector<Arc::arc> nodeArcs;
 	};
 private:
 
