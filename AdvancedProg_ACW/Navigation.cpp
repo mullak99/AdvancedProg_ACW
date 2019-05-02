@@ -84,11 +84,8 @@ const bool BFS(vector<int> adj[], vector<string> adjMode[], int src, int dest, s
 				pred[adj[u][i]] = u;
 				queue.push_back(adj[u][i]);
 
-				if (mode == "")
-				{
-					if (adj[u][i] == dest)
-						return true;
-				}
+				if (mode == "" && adj[u][i] == dest)
+					return true;
 				else if (adj[u][i] == dest && adjMode[u][i] == mode)
 					return true;
 			}
