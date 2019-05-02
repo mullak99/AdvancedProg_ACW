@@ -38,6 +38,15 @@ const void Navigation::InitFile()
 	outputFile << fixed << setprecision(3);
 }
 
+/*
+	CREDITS:
+
+	The 'add_edge', 'BFS' and 'findShortestPath' methods were based on the 'Shortest path in an unweighted graph'
+	code that can be found on this page: https://www.geeksforgeeks.org/shortest-path-unweighted-graph/
+
+	Variations in the code was needed to add support for Transport Mode checking.
+*/
+
 void add_edge(vector<int> adj[], vector<string> adjMode[], int src, int dest, string mode)
 {
 	adj[src].push_back(dest);
