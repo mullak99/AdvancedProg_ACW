@@ -12,13 +12,13 @@ public: //this is where the functions go
 	Node() {}
 	struct node
 	{
-		node(const string &name, const int ref, const float latitude, const float longitude) :
+		node(const string &name, const int ref, const double latitude, const double longitude) :
 			Nodename(name), refnum(ref), lat(latitude), longi(longitude) {}
 
 		string Nodename;
 		int refnum;
-		float lat;
-		float longi;
+		double lat;
+		double longi;
 		vector<Arc::arc> m_arcs;
 	};
 private:

@@ -6,10 +6,7 @@
 #include <vector>
 #include "Node.h"
 #include "Arc.h"
-#include <iterator>
 #include <string>
-#include <numeric>
-#include <list> 
 #include <array>
 
 using namespace std;
@@ -17,18 +14,25 @@ using namespace std;
 vector<Node::node> nodes;
 int v, e;
 
-const bool showloading = false;
-const bool debug = false;
+ofstream outputFile;
 
 // Converts latitude/longitude into eastings/northings
 extern void LLtoUTM(const double Lat, const double Long, double &UTMNorthing, double &UTMEasting);
 
 Navigation::Navigation() : _outFile("Output.txt")
 {
+	InitFile();
 }
 
 Navigation::~Navigation()
 {
+}
+
+const void Navigation::InitFile()
+{
+	_outFile.open("Output.txt");
+
+	_outFile << fixed << setprecision(3);
 }
 
 const bool Navigation::ProcessCommand(const string& commandString) const
@@ -104,7 +108,7 @@ const bool Navigation::MaxDist() const
 	}
 	if (largestDist > 0 && largestNode1 != nullptr && largestNode2 != nullptr)
 	{
-		cout << setprecision(3) << "MaxDist" << endl << largestNode1->Nodename << "," << largestNode2->Nodename << "," << largestDist << endl << endl;
+		outputFile << "MaxDist" << endl << largestNode1->Nodename << "," << largestNode2->Nodename << "," << setprecision(3) << largestDist << endl << endl;
 		return true;
 	}
 	return false;
@@ -149,7 +153,7 @@ const bool Navigation::MaxLink() const
 	}
 	if (largestDist > 0 && largestArc != nullptr)
 	{
-		cout << setprecision(3) << "MaxLink" << endl << largestArc->linkref1 << "," << largestArc->linkref2 << "," << largestDist << endl << endl;
+		outputFile << "MaxLink" << endl << largestArc->linkref1 << "," << largestArc->linkref2 << "," << setprecision(3) << largestDist << endl << endl;
 		return true;
 	}
 	return false;
@@ -164,8 +168,8 @@ const bool Navigation::FindDist(const std::string& params) const
 	inString >> linkRef1;
 	inString >> linkRef2;
 
-	
 
+	
 	return false;
 }
 
@@ -177,7 +181,7 @@ const bool Navigation::FindNeighbour(const std::string& params) const
 	inString >> command;
 	inString >> linkRef;
 
-	cout << "FindNeighbour " << linkRef << endl;
+	outputFile << "FindNeighbour " << linkRef << endl;
 
 	bool done = false;
 	for (auto& element : nodes)
@@ -187,16 +191,16 @@ const bool Navigation::FindNeighbour(const std::string& params) const
 			if (arc.linkref1 == linkRef)
 			{
 				done = true;
-				cout << arc.linkref2 << endl;
+				outputFile << arc.linkref2 << endl;
 			}
 			else if (arc.linkref2 == linkRef)
 			{
 				done = true;
-				cout << arc.linkref1 << endl;
+				outputFile << arc.linkref1 << endl;
 			}
 		}
 	}
-	cout << endl;
+	outputFile << endl;
 
 	return done;
 }
@@ -218,7 +222,7 @@ const bool Navigation::Check(const std::string& params) const
 	const int refsSize = static_cast<int>(refs.size());
 	if (refsSize > 0)
 	{
-		cout << params << endl;
+		outputFile << params << endl;
 
 		for (int i = 0; i < refsSize - 1; i++)
 		{
@@ -250,16 +254,15 @@ const bool Navigation::Check(const std::string& params) const
 		{
 			if (valid[i] == 1)
 			{
-				cout << refs[i] << "," << refs[i + 1] << ",PASS" << endl;
+				outputFile << refs[i] << "," << refs[i + 1] << ",PASS" << endl;
 			}
 			else
 			{
-				cout << refs[i] << "," << refs[i + 1] << ",FAIL" << endl;
+				outputFile << refs[i] << "," << refs[i + 1] << ",FAIL" << endl;
 				break;
 			}
 		}
-		cout << endl;
-
+		outputFile << endl;
 		return true;
 	}
 	return false;
@@ -288,7 +291,7 @@ const bool Navigation::FindShortestRoute(const std::string& params) const
 	inString >> linkRef1;
 	inString >> linkRef2;
 	
-	return true;
+	return false;
 }
 
 const bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &fileNameLinks) const
@@ -304,8 +307,6 @@ const bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &
 	{
 		{
 			{
-				if (debug && showloading) cout << "Loading Places..." << endl;
-
 				string line;
 				while (getline(finPlaces, line))
 				{
@@ -334,18 +335,12 @@ const bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &
 					v++;
 
 					nodes.push_back(Node::node(placeName, placesRef, placesLat, placesLong));
-
-					if (debug && showloading) cout << "Place: " << placeName << ", Ref: " << placesRef << ", Long: " << placesLong << ", Lat: " << placesLat << endl;
 				}
-
-				if (debug && showloading) cout << "Finished Loading Places." << endl << endl;
 
 				finPlaces.close();
 			}
 			
 			{
-				if (debug && showloading) cout << "Loading Links..." << endl;
-
 				string line;
 				while (getline(finLinks, line))
 				{
@@ -372,28 +367,9 @@ const bool Navigation::BuildNetwork(const string &fileNamePlaces, const string &
 						if (element.refnum == linkRef1)
 							element.m_arcs.push_back(Arc::arc(linkRef1, linkRef2, linkMode));
 					}
-
-					if (debug && showloading) cout << "LinkMode: " << linkMode << ", Ref1: " << linkRef1 << ", Ref2: " << linkRef2 << endl;
 				}
-
-				if (debug && showloading) cout << "Finished Loading Links." << endl << endl;
 
 				finLinks.close();
-			}
-
-			if (debug)
-			{
-				int i = 0;
-				for (auto& element : nodes)
-				{
-					cout << "Node[" << i << "] Nodename: " << element.Nodename << ", Ref: " << element.refnum << ", Long: " << element.longi << ", Lat: " << element.lat << endl;
-					for (const auto& arc : element.m_arcs)
-					{
-						cout << "	LinkMode: " << arc.transportmode << ", Ref1: " << arc.linkref1 << ", Ref2: " << arc.linkref2 << endl;
-					}
-					cout << endl;
-					i++;
-				}
 			}
 		}
 	}

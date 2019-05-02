@@ -13,6 +13,8 @@ public:
 	Navigation();
 	~Navigation();
 
+	const void InitFile();
+
 	const bool BuildNetwork(const std::string& fileNamePlaces, const std::string& fileNameLinks) const;
 	const bool ProcessCommand(const std::string& commandString) const;
 	const bool MaxDist() const;
@@ -22,6 +24,7 @@ public:
 	const bool Check(const std::string& params) const;
 	const bool FindRoute(const std::string& params) const;
 	const bool FindShortestRoute(const std::string& params) const;
+
 
 	// Add your code here
 };
